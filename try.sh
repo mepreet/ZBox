@@ -2,13 +2,15 @@
 #
 # ZBox setup
 #
+# Maintenance: REQUIRED
+#
 # Any file edited in this script with "sid" will 
 # have a backup file with ".bak" extention.
 #
 
 
 #-----------------------------------------------------------------------------
-set -x
+
 
 : <<'END'
 declare -A tools=(
@@ -84,19 +86,49 @@ if [ "$hardWay" == "y" -o "$hardWay" == "Y" ] ; then
 
  		yesORno[$i]=$yORn
 fi
+END
+#-------------------------------------------------------------------------------------------
+spinner=( "|" "/" "-" "\\" )
+spin(){
+	while kill -0 $1 >/dev/null 2>&1
+  	do
+    		for i in ${spinner[@]};
+    		do
+      			echo -ne "\r$2 [ $i ]";
+      			sleep 0.2;
+   		done;
+  	done
+	echo -ne "\r$3" ; echo
+	
+}
 
 #-------------------------------------------------------------------------------------------
 # Any New tool needed to be written in a seperate function 
 #-------------------------------------------------------------------------------------------
-END
+
+success_msg="Installation Completed"
+
 # function for VMWare
 VMWare() {
-	wget -P /root/Downloads https://www.vmware.com/go/getplayer-linux
-	/root/Downloads/
+	echo "******************* VMWare *******************"
+	VMWare_bundle="/root/Downloads/VMWareZbox.bundle"
+	curl -L -o $VMWare_bundle --create-dirs https://www.vmware.com/go/getplayer-linux -s &
+	save_pid=$!; spin $save_pid Downloading..... "Download Completed....."
+	chmod +x $VMWare_bundle ; $VMWare_bundle > /dev/null 2>&1 &
+	save_pid=$!; spin $save_pid Installing..... "Installation Completed....."
+	return 0
 }
 
-# function for OpenVPN
 # function for GoLang
+GoLang() {
+
+	echo "******************* GoLang *******************"
+	apt install golang > /dev/null 2>&1 & 
+	save_pid=$!; spin $save_pid Installing..... $(success_msg)
+	 
+}
+
+
 # function for Kerbrute
 # function for Gowitness
 # function for Impacket
@@ -107,9 +139,9 @@ VMWare() {
 # function for EyeWitness
 # function for Nessus"]
 # function for NoMachine
+# function for OpenVPN
 
-
-$VMWare
+GoLang
 #-------------------------------------------------------------------------------------------
 
 : <<'END'
