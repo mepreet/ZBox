@@ -173,6 +173,7 @@ dependencies(){
 
 #-------------------------------------------------------------------------------------------
 # Calling Dependencies
+	echo -e "\nWarming up....It might take some time\n"
 	dependencies
 
 
@@ -299,7 +300,7 @@ test_case(){
 
 for i in "${!yesORno[@]}";
 do 
-	if [ "${yesORno[$i]}" == "y" ] -o [ "${yesORno[$i]}" == "Y" ] ; then
+	if [ "${yesORno[$i]}" == "y" -o "${yesORno[$i]}" == "Y" ] ; then
 		echo ; $i ; echo
 	fi
 done
