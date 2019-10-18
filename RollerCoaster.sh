@@ -43,24 +43,34 @@ declare -A tools=(
 
 declare -A yesORno=(
 
-#	["VMWare"]="Y"
-#	["NoMachine"]="Y"
-#	["GoLang"]="Y"	
-#	["Kerbrute"]="Y"
-#	["Gowitness"]="Y"
-#	["Impacket"]="Y"
-#	["CrackMapExec"]="Y"
-#	["SLUserNames"]="Y"
-#	["SecList"]="Y"
-#	["Nessus"]="Y"
-#	["bettercap"]="Y"
-#	["libreoffice"]="Y"
-#	["heimdal_clients"]="Y"
-#	["bloodhound"]="Y"
-#	["Nessus"]="Y"
-	["test_case"]="Y"
+	["VMWare"]="Y"
+	["NoMachine"]="Y"
+	["Kerbrute"]="Y"
+	["Gowitness"]="Y"
+	["Impacket"]="Y"
+	["CrackMapExec"]="Y"
+	["SLUserNames"]="Y"
+	["SecList"]="Y"
+	["Nessus"]="Y"
+	["Bettercap"]="Y"
+	["Libreoffice"]="Y"
+	["Heimdal_clients"]="Y"
+	["Bloodhound"]="Y"
+	["Nessus"]="Y"
+	["test_case"]="N"
 )
 
+#-------------------------------------------------------------------------------------------
+
+#Print Menu 
+
+echo -e  "\t\t This Script Can installl Following Tools:"
+
+for i in "${!yesORno[@]}"
+do
+	echo -e "\t\t${i}"
+done
+	
 #-------------------------------------------------------------------------------------------
 
 # Enable the ssh and edit 'sshd_config' file
@@ -97,60 +107,83 @@ declare -A yesORno=(
 	 		yesORno[$i]=$yORn
 	fi
 
+
 #-------------------------------------------------------------------------------------------
 # Miscellaneous 
 
+# Animation function
 buffer(){
 	spinner=( "|" "/" "-" "\\" )
 	while kill -0 $1 >/dev/null 2>&1
   	do
     		for i in ${spinner[@]};
     		do
-      			echo -ne "\r$2 [ $i ]";
+      			echo -ne "\r${2} [ ${i} ]";
       			sleep 0.2;
    		done;
   	done
-	echo -ne "\r$3" ; echo
+	echo -ne "\r${3}" ; echo
 	
 }
 
-#-------------------------------------------------------------------------------------------
-# Dependencies: add any dependencies in this function & make sure IO gets eaten by /dev/null
-#-------------------------------------------------------------------------------------------
-
-dependencies(){
-	echo Installing Dependencies....
-	apt -y install python-pip > /dev/null 2>&1
-	buffer $! "Installing.....(1/2)" "Installation Completed.....(1/2)"
-}
 
 #-------------------------------------------------------------------------------------------
-# Any New tool needed to be written in a seperate function and update array tabls's above
+# Dependencies: Add any dependencies in below as a seperate function, make sure IO gets  
+#		redirected to /dev/null, send process id to buffer and update 'dependencies'
+#		function above by calling new dependecy function in it.	
 #-------------------------------------------------------------------------------------------
-
-#Global Variables:
-head="echo Currently working on:"
 
 # function for VMWare
-VMWare() {
-	$head ${FUNCNAME[0]}
-	VMWare_bundle="/root/Downloads/VMWareZbox.bundle"
-	curl -L -o $VMWare_bundle --create-dirs ${tools["VMWare"]} -s &
-	buffer $! Downloading..... "Download Completed....."
-	chmod +x $VMWare_bundle ; $VMWare_bundle > /dev/null 2>&1 &
-	buffer $! Installing..... "Installation Completed....."
-	return 0
+
+apt_update(){
+	apt update > /dev/null 2>&1 &
+	buffer $! $1 "$2"
 }
 
-# function for GoLang
+apt_upgrade(){
+	apt full-upgrade -y --autoremove --purge > /dev/null 2>&1 &
+	buffer $! $1 "$2"
+}
+
+Pip(){
+	apt -y install python-pip > /dev/null 2>&1 &
+	buffer $! $1 "$2"
+}
+
 GoLang() {
 
-	$head ${FUNCNAME[0]}
 	apt install golang > /dev/null 2>&1 & 
-	buffer $! Installing..... "Installation Completed....."
+	buffer $! $1 "$2"
 	echo 'export PATH=$PATH:/root/go' >> /etc/profile ; source /etc/profile
 	echo 'export PATH=$PATH:/root/go' >> /root/.profile; source /root/.profile	
 }
+
+#-------------------------------------------------------------------------------------------
+# Dependencies Master call: Function for every Dependencies needed to be called from below
+#			    'dependencies' function. Keep it updated if new dependencies are
+#			    addded.
+#-------------------------------------------------------------------------------------------
+
+dependencies(){
+	apt_update 'Installing.....(1/4)' "Installation Completed.....(1/4)"
+	apt_upgrade 'Installing.....(2/4)' 'Installation Completed.....(2/4)'
+	Pip 'Installing.....(3/4)' 'Installation Completed.....(3/4)'
+	GoLang 'Installing.....(4/4)' 'Installation Completed.....(4/4)'
+}
+
+#-------------------------------------------------------------------------------------------
+# Calling Dependencies
+	dependencies
+
+
+#------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------#
+# Any new tool needed to be written in a seperate function and update array table's above  #
+#------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------#
+
+#Global Variables:
+head="echo Currently working on:"
 
 # function for NoMachine
 NoMachine() {
@@ -162,8 +195,18 @@ NoMachine() {
 	buffer $! Installing..... "Installation Completed....."
 }
 
+VMWare() {
+	$head ${FUNCNAME[0]}
+	VMWare_bundle="/root/Downloads/VMWareZbox.bundle"
+	curl -L -o $VMWare_bundle --create-dirs ${tools["VMWare"]} -s &
+	buffer $! Downloading..... "Download Completed....."
+	chmod +x $VMWare_bundle ; $VMWare_bundle > /dev/null 2>&1 &
+	buffer $! Installing..... "Installation Completed....."
+	return 0
+}
+
 # function for Kerbrute
-kerbrute(){
+Kerbrute(){
 	$head ${FUNCNAME[0]}
 	go get ${tools["Kerbrute"]} &
 	buffer $! Downloading..... "Download Completed....."
@@ -209,31 +252,31 @@ SecList(){
 	buffer $! Downloading..... "Download Completed....."
 }
 
-# function for bettercap
-bettercap(){
+# function for Bettercap
+Bettercap(){
 	$head ${FUNCNAME[0]}
 	apt install bettercap -y > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
-# function for libreoffice 
-libreoffice() {
+# function for Libreoffice 
+Libreoffice() {
 	$head ${FUNCNAME[0]}
-	apt install libreoffice -y /dev/null 2>&1 &
+	apt install libreoffice -y > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
-# function for heimdal-clients
-heimdal_clients(){
+# function for Heimdal-clients
+Heimdal_clients(){
 	$head ${FUNCNAME[0]}
-	apt install heimdal-clients -y /dev/null 2>&1 &
+	apt install heimdal-clients -y > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
-# funtion for bloodhound
-bloodhound() {
+# funtion for Bloodhound
+Bloodhound() {
 	$head ${FUNCNAME[0]}
-	pip install bloodhound /dev/null 2>&1 &
+	pip install bloodhound > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
@@ -254,16 +297,14 @@ test_case(){
 #					   M A I N					   #
 #-------------------------------------------------------------------------------------------
 
-
 for i in "${!yesORno[@]}";
-do
-	echo $i
-	if [ yesORno[$i] == "y" -o yesORno[$i] == "Y" ] ; then	
+do 
+	if [ ${yesORno[$i]} == "y" -o ${yesORno[$i]} == "Y" ] ; then
 		$i
 	fi
 done
 
-
+#-------------------------------------------------------------------------------------------
 
 
 
