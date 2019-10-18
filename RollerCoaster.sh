@@ -11,15 +11,15 @@
 
 #------------------------------ B A N N E R ------------------------------#
 
-printf '
+printf "
 :::::::::  :::::::::    ::::::::   :::    :::
      :+:   :+:    :+:  :+:    :+:  :+:    :+: 
     +:+    +:+    +:+  +:+    +:+   +:+  +:+      
    +#+     +#++:++#+   +#+    +:+    +#++:+      ________________  _____
-  +#+      +#+    +#+  +#+    +#+   +#+  +#+    / __/ __/_  __/ / / / _ \
+  +#+      +#+    +#+  +#+    +#+   +#+  +#+    / __/ __/_  __/ / / / _ \\
  #+#       #+#    #+#  #+#    #+#  #+#    #+#  _\ \/ _/  / / / /_/ / ___/
 #########  #########    ########   ###    ### /___/___/ /_/  \____/_/					                       
-\n'
+\n"
 
 #-------------------------------------------------------------------------#
 
@@ -68,7 +68,7 @@ echo -e  "\t\t This Script Can installl Following Tools:"
 
 for i in "${!yesORno[@]}"
 do
-	echo -e "\t\t${i}"
+	echo -e "\t\t --> ${i}"
 done
 	
 #-------------------------------------------------------------------------------------------
@@ -78,15 +78,15 @@ done
 
 	file_path='/etc/ssh/sshd_config'
 	update-rc.d ssh enable
-	sed -i.bak s/"#PermitRootLogin prohibit-password"/"PermitRootLogin yes"/ $file_path
+	sed -i.bak 's/"#PermitRootLogin prohibit-password"/"PermitRootLogin yes"/' $file_path
 
 
 #-------------------------------------------------------------------------------------------
 
 # checkpoint whether going full install or manual 
-
-
-	read -p "Do you want to go Manually [y] or Hail Mary [n]: (y/n) => " hardWay
+	
+	
+	echo ; read -p "Do you want to go Manually [y] or Hail Mary [n]: (y/n) => " hardWay
 	until [ $hardWay == "y" -o $hardWay == "Y" -o $hardWay == "n" -o $hardWay == "N" ]
 	do
 		echo "Invalid input try again"
@@ -114,12 +114,12 @@ done
 # Animation function
 buffer(){
 	spinner=( "|" "/" "-" "\\" )
-	while kill -0 $1 >/dev/null 2>&1
+	while kill -0 "$1" >/dev/null 2>&1
   	do
-    		for i in ${spinner[@]};
+    		for i in "${spinner[@]}";
     		do
       			echo -ne "\r${2} [ ${i} ]";
-      			sleep 0.2;
+      			sleep 0.1;
    		done;
   	done
 	echo -ne "\r${3}" ; echo
@@ -137,25 +137,25 @@ buffer(){
 
 apt_update(){
 	apt update > /dev/null 2>&1 &
-	buffer $! $1 "$2"
+	buffer $! "$1" "$2"
 }
 
 apt_upgrade(){
 	apt full-upgrade -y --autoremove --purge > /dev/null 2>&1 &
-	buffer $! $1 "$2"
+	buffer $! "$1" "$2"
 }
 
 Pip(){
 	apt -y install python-pip > /dev/null 2>&1 &
-	buffer $! $1 "$2"
+	buffer $! "$1" "$2"
 }
 
 GoLang() {
 
 	apt install golang > /dev/null 2>&1 & 
-	buffer $! $1 "$2"
-	echo 'export PATH=$PATH:/root/go' >> /etc/profile ; source /etc/profile
-	echo 'export PATH=$PATH:/root/go' >> /root/.profile; source /root/.profile	
+	buffer $! "$1" "$2"
+	echo "export PATH=$PATH:/root/go" >> /etc/profile ; source /etc/profile
+	echo "export PATH=$PATH:/root/go" >> /root/.profile; source /root/.profile	
 }
 
 #-------------------------------------------------------------------------------------------
@@ -187,42 +187,42 @@ head="echo Currently working on:"
 
 # function for NoMachine
 NoMachine() {
-	$head ${FUNCNAME[0]}
+	$head "${FUNCNAME[0]}"
 	Nomachine_deb="/root/Downloads/NoMachine.deb"
-	curl -o $Nomachine_deb --create-dirs ${tools["NoMachine"]} -s &
+	curl -o "$Nomachine_deb" --create-dirs "${tools["NoMachine"]}" -s &
 	buffer $! Downloading..... "Download Completed....."
 	dpkg -i /root/Downloads/NoMachine.deb > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
 VMWare() {
-	$head ${FUNCNAME[0]}
+	$head "${FUNCNAME[0]}"
 	VMWare_bundle="/root/Downloads/VMWareZbox.bundle"
-	curl -L -o $VMWare_bundle --create-dirs ${tools["VMWare"]} -s &
+	curl -L -o "$VMWare_bundle" --create-dirs "${tools["VMWare"]}" -s &
 	buffer $! Downloading..... "Download Completed....."
-	chmod +x $VMWare_bundle ; $VMWare_bundle > /dev/null 2>&1 &
+	chmod +x "$VMWare_bundle" ; "$VMWare_bundle" > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 	return 0
 }
 
 # function for Kerbrute
 Kerbrute(){
-	$head ${FUNCNAME[0]}
-	go get ${tools["Kerbrute"]} &
+	$head "${FUNCNAME[0]}"
+	go get "${tools["Kerbrute"]}" &
 	buffer $! Downloading..... "Download Completed....."
 }
 
 # function for Gowitness
 Gowitness(){
-	$head ${FUNCNAME[0]}
-	go get -u ${tools["Gowitness"]} &
+	$head "${FUNCNAME[0]}"
+	go get -u "${tools["Gowitness"]}" &
 	buffer $! Downloading..... "Download Completed....."
 }
 
 # function for Impacket
 Impacket(){
-	$head ${FUNCNAME[0]}
-	git clone ${tools["Impacket"]} /opt/impacket > /dev/null 2>&1 &
+	$head "${FUNCNAME[0]}"
+	git clone "${tools["Impacket"]}" /opt/impacket > /dev/null 2>&1 &
 	buffer $! Downloading..... "Download Completed....."
 	pip install /opt/impacket/. > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
@@ -230,8 +230,8 @@ Impacket(){
 
 # function for CrackMapExec
 CrackMapExec(){
-	$head ${FUNCNAME[0]}
-	git clone --recursive  ${tools["CrackMapExec"]} /opt/CrackMap > /dev/null 2>&1 &
+	$head "${FUNCNAME[0]}"
+	git clone --recursive  "${tools["CrackMapExec"]}" /opt/CrackMap > /dev/null 2>&1 &
 	buffer $! Downloading..... "Download Completed....."
 	pip install -r /opt/CrackMap/requirements.txt > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
@@ -240,50 +240,50 @@ CrackMapExec(){
 
 # function for SLUserNames
 SLUserNames(){
-	$head ${FUNCNAME[0]}
-	git clone ${tools["SLUserNames"]} > /dev/null 2>&1 &
+	$head "${FUNCNAME[0]}"
+	git clone "${tools["SLUserNames"]}" > /dev/null 2>&1 &
 	buffer $! Downloading..... "Download Completed....."
 }
 
 # function for SecList
 SecList(){
-	$head ${FUNCNAME[0]}
-	git clone ${tools["SecList"]} > /dev/null 2>&1 &
+	$head "${FUNCNAME[0]}"
+	git clone "${tools["SecList"]}" > /dev/null 2>&1 &
 	buffer $! Downloading..... "Download Completed....."
 }
 
 # function for Bettercap
 Bettercap(){
-	$head ${FUNCNAME[0]}
+	$head "${FUNCNAME[0]}"
 	apt install bettercap -y > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
 # function for Libreoffice 
 Libreoffice() {
-	$head ${FUNCNAME[0]}
+	$head "${FUNCNAME[0]}"
 	apt install libreoffice -y > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
 # function for Heimdal-clients
 Heimdal_clients(){
-	$head ${FUNCNAME[0]}
+	$head "${FUNCNAME[0]}"
 	apt install heimdal-clients -y > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
 # funtion for Bloodhound
 Bloodhound() {
-	$head ${FUNCNAME[0]}
+	$head "${FUNCNAME[0]}"
 	pip install bloodhound > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
 }
 
 # function for Nessus
 Nessus() {
-	$head ${FUNCNAME[0]}; Nessus_deb="/root/Downloads/Nessus.deb"
-	curl -o $Nessus_deb --create-dirs ${tools["Nessus"]} -s &
+	$head "${FUNCNAME[0]}" ; Nessus_deb="/root/Downloads/Nessus.deb"
+	curl -o $Nessus_deb --create-dirs "${tools["Nessus"]}" -s &
 	buffer $! Downloading..... "Download Completed....."
 	dpkg -i /root/Downloads/Nessus.deb > /dev/null 2>&1 &
 	buffer $! Installing..... "Installation Completed....."
@@ -299,8 +299,8 @@ test_case(){
 
 for i in "${!yesORno[@]}";
 do 
-	if [ ${yesORno[$i]} == "y" -o ${yesORno[$i]} == "Y" ] ; then
-		$i
+	if [ "${yesORno[$i]}" == "y" ] -o [ "${yesORno[$i]}" == "Y" ] ; then
+		echo ; $i ; echo
 	fi
 done
 
